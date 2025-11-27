@@ -1,0 +1,67 @@
+## Visual Studio / .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dbmdl
+*.jfm
+*.pdb
+*.mdb
+*.opendb
+
+# Auto-generated files
+Generated_Code/
+
+# Publish folders
+publish/
+out/
+
+# Logs
+*.log
+
+# ASP.NET secrets
+secrets.json
+
+# IIS Express
+.vs/
+*.vspscc
+.vscode/
+
+# Rider
+.idea/
+
+# SQL
+*.mdf
+*.ldf
+
+# Environment files
+.env
+
+## Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# Android
+android/.gradle/
+android/.idea/
+android/local.properties
+android/*.iml
+
+# iOS
+ios/Flutter/Flutter.podspec
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/Runner.xcodeproj/project.xcworkspace/
+
+# Web build
+web/.dart_tool/
+web/.flutter-plugins
+
+# Generated code
+lib/generated_plugin_registrant.dart
