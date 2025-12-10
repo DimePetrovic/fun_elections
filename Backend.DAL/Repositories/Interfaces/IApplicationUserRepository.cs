@@ -7,7 +7,7 @@ using Backend.Models;
 
 namespace Backend.DAL.Repositories.Interfaces
 {
-    interface IApplicationUserRepository : IRepository<ApplicationUser>
+    public interface IApplicationUserRepository : IRepository<ApplicationUser>
     {
     }
 }
