@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Backend.Models;
+using Backend.DAL.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace Backend.Services;

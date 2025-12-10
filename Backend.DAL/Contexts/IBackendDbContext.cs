@@ -1,4 +1,4 @@
-﻿using Backend.Models;
+﻿using Backend.DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;

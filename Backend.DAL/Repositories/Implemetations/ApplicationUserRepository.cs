@@ -1,6 +1,6 @@
 ﻿using Backend.DAL.Contexts;
 using Backend.DAL.Repositories.Interfaces;
-using Backend.Models;
+using Backend.DAL.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;

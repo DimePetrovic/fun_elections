@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Backend.Models;
+using Backend.DAL.Models;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Backend.DAL.Contexts;

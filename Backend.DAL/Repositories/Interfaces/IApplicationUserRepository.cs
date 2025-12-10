@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Backend.Models;
+using Backend.DAL.Models;
 
 namespace Backend.DAL.Repositories.Interfaces
 {

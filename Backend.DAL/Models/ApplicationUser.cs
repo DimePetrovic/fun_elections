@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Backend.Models;
+namespace Backend.DAL.Models;
 public class ApplicationUser : IdentityUser
 {
-    public string DisplayName { get; set; }
+    public string DisplayName { get; set; } = string.Empty;
 }

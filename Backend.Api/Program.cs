@@ -2,7 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Backend.Models;
+using Backend.DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using Backend.DAL.Contexts;
 

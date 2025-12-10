@@ -1,6 +1,8 @@
 ## Visual Studio / .NET
-bin/
-obj/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
 *.user
 *.suo
 *.cache
@@ -9,34 +11,123 @@ obj/
 *.pdb
 *.mdb
 *.opendb
+*.sln.docstates
 
-# Auto-generated files
-Generated_Code/
-
-# Publish folders
-publish/
-out/
-
-# Logs
-*.log
-
-# ASP.NET secrets
-secrets.json
-
-# IIS Express
+# Visual Studio cache/options
 .vs/
 *.vspscc
+*.vssscc
 .vscode/
+.vsconfig
 
 # Rider
 .idea/
+*.sln.iml
+
+# User-specific files
+*.rsuser
+*.userosscache
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# Auto-generated files
+Generated_Code/
+[Aa]uto[Gg]enerated/
+
+# Publish folders
+publish/
+PublishProfiles/
+*.Publish.xml
+*.pubxml
+*.publishproj
+out/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Logs
+*.log
+*.stackdump
+
+# ASP.NET secrets
+secrets.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
 
 # SQL
 *.mdf
 *.ldf
+*.bak
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
 
 # Environment files
 .env
+.env.local
+.env.*.local
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# JetBrains Rider
+*.sln.iml
+
+# CodeRush
+.cr/
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+
+# Migrations (optional - uncomment if you don't want to track migrations)
+# **/Migrations/
 
 ## Flutter / Dart
 .dart_tool/
