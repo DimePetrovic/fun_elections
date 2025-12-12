@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 namespace Backend.DAL.Contexts;
 public class BackendDbContext : IdentityDbContext<ApplicationUser>, IBackendDbContext
 {
+    public virtual DbSet<Voter> Voters { get; set; }
+
     public BackendDbContext(DbContextOptions<BackendDbContext> options) : base(options) { }
 
     // public DbSet<Product> Products { get; set; }

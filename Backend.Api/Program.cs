@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using Backend.DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using Backend.DAL.Contexts;
+using Backend.BL.Services.Interfaces;
+using Backend.BL.Services.Implemetations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<BackendDbContext>()
 .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IVoterService, VoterService>();
 
 
 builder.Services.AddControllers();

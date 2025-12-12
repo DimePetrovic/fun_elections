@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Backend.DAL.Models;
 using Microsoft.Extensions.Configuration;
 
-namespace Backend.Services;
+namespace Backend.BL.Services.Implemetations;
 public class TokenService
 {
     private readonly IConfiguration _config;

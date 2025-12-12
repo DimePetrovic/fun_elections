@@ -19,6 +19,7 @@ namespace Backend.DAL.Contexts
         DbSet<IdentityUserLogin<string>> UserLogins { get; }
         DbSet<IdentityRoleClaim<string>> RoleClaims { get; }
         DbSet<IdentityUserToken<string>> UserTokens { get; }
+        DbSet<Voter> Voters { get; }
 
 
 
