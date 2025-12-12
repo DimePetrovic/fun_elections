@@ -7,6 +7,8 @@ namespace Backend.DAL.Contexts;
 public class BackendDbContext : IdentityDbContext<ApplicationUser>, IBackendDbContext
 {
     public virtual DbSet<Voter> Voters { get; set; }
+    public virtual DbSet<Election> Elections { get; set; }
+
 
     public BackendDbContext(DbContextOptions<BackendDbContext> options) : base(options) { }
 

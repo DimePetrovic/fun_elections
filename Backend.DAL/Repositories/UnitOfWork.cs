@@ -19,6 +19,10 @@ namespace Backend.DAL.Repositories
 
         public IApplicationUserRepository Users { get; private set; }
 
+        public IVoterRepository Voters { get; private set; }
+
+        public IElectionRepository Elections { get; private set; }
+
         private bool _disposed;
         private readonly ILogger<UnitOfWork> _logger;
 

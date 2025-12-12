@@ -29,6 +29,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IVoterService, VoterService>();
+builder.Services.AddScoped<IElectionService, ElectionService>();
 
 
 builder.Services.AddControllers();
