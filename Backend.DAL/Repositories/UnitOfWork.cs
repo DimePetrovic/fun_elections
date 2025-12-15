@@ -1,4 +1,5 @@
 ﻿using Backend.DAL.Contexts;
+using Backend.DAL.Repositories.Implemetations;
 using Backend.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -34,6 +35,7 @@ namespace Backend.DAL.Repositories
             _logger = logger;
 
             Users = userRepository;
+            Elections = new ElectionRepository(backendDbContext, logger);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
