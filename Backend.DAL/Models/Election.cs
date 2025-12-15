@@ -13,7 +13,6 @@ namespace Backend.DAL.Models
         public string Name { get; set; } = string.Empty;
         public bool isPublic { get; set; }
         public string Description { get; set; } = string.Empty;
-        public EElectionType ElectionType { get; set; }
-
+        public EElectionType ElectionType { get; set; } 
     }
 }

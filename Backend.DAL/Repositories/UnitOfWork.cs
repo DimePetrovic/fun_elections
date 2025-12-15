@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Backend.DAL.Repositories
 {
-   internal class UnitOfWork : IUnitOfWork
+   public class UnitOfWork : IUnitOfWork
     {
 
         private readonly IBackendDbContext _dbContext;
@@ -35,6 +35,7 @@ namespace Backend.DAL.Repositories
             _logger = logger;
 
             Users = userRepository;
+            Voters = new VoterRepository(backendDbContext, logger);
             Elections = new ElectionRepository(backendDbContext, logger);
         }
 

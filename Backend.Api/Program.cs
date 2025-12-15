@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Backend.DAL.Contexts;
 using Backend.BL.Services.Interfaces;
 using Backend.BL.Services.Implemetations;
+using Backend.DAL.Repositories;
+using Backend.DAL.Repositories.Interfaces;
+using Backend.DAL.Repositories.Implemetations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +31,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<BackendDbContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IBackendDbContext>(provider => provider.GetRequiredService<BackendDbContext>());
+builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IVoterService, VoterService>();
 builder.Services.AddScoped<IElectionService, ElectionService>();
 

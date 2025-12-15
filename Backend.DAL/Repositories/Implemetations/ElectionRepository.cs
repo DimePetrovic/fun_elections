@@ -13,7 +13,7 @@ namespace Backend.DAL.Repositories.Implemetations
     class ElectionRepository : Repository<Election, IBackendDbContext>, IElectionRepository
     {
         public ElectionRepository(IBackendDbContext DbContext, ILogger logger) : base(DbContext, logger)
-        {
+        {       
         }
     }
 }

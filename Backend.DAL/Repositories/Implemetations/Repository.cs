@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Backend.DAL.Repositories.Implemetations
 {
-    internal class Repository<T, TContext> : IRepository<T>
+    public class Repository <T, TContext> : IRepository<T>
        where T : class
        where TContext : IDbContext
     {

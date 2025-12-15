@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Backend.BL.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace Backend.BL.Services.Interfaces
 {
     public interface IElectionService
     {
+        Task<IEnumerable<ElectionDto>> GetAllAsync();
     }
 }
