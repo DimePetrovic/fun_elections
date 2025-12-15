@@ -11,8 +11,11 @@ namespace Backend.DAL.Models
     {
         public List<Voter> Voters { get; set; } = new();
         public string Name { get; set; } = string.Empty;
-        public bool isPublic { get; set; }
         public string Description { get; set; } = string.Empty;
-        public EElectionType ElectionType { get; set; } 
+        public bool isPublic { get; set; }
+        public EElectionType ElectionType { get; set; }
+        public List<Candidate> Candidates { get; set; } = new();
+
+
     }
 }

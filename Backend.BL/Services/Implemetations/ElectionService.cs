@@ -23,10 +23,10 @@ namespace Backend.BL.Services.Implemetations
         }
         public async Task<IEnumerable<ElectionDto>> GetAllAsync()
         {
-            // 1️⃣ Dohvatanje modela iz repo-a
+            // Dohvatanje modela iz repo-a
             var elections = await _unitOfWork.Elections.GetAllAsync();
 
-            // 2️⃣ Mapiranje model -> DTO (ručno, čisto)
+            // Mapiranje model -> DTO (ručno, čisto)
             return elections.Select(e => new ElectionDto
             {
                 Id = e.Id,
