@@ -24,6 +24,11 @@ namespace Backend.DAL.Repositories
 
         public IElectionRepository Elections { get; private set; }
 
+        public IMatchRepository Matches { get; private set; }
+        public IGroupRepository Groups { get; private set; }
+        public ICandidateRepository Candidates { get; private set; }
+
+
         private bool _disposed;
         private readonly ILogger<UnitOfWork> _logger;
 

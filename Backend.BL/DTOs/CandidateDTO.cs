@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Backend.DAL.Models
+namespace Backend.BL.DTOs
 {
-    public class Candidate : Auxiliary.IdentityModel
+    public class CandidateDTO
     {
+        public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public int Points { get; set; } = 0;
-
-        public Guid ElectionId { get; set; }
-        
+        public int Points { get; set; }
     }
 }

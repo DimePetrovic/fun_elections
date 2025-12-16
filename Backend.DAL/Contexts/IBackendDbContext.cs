@@ -21,7 +21,9 @@ namespace Backend.DAL.Contexts
         DbSet<IdentityUserToken<string>> UserTokens { get; }
         DbSet<Voter> Voters { get; }
         DbSet<Election> Elections { get; }
-
+        DbSet<Candidate> Candidates { get; }
+        DbSet<Group> Groups { get; }
+        DbSet<Match> Matches { get; }
 
 
     }

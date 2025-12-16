@@ -21,21 +21,31 @@ namespace Backend.BL.Services.Implemetations
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
-        public async Task<IEnumerable<ElectionDto>> GetAllAsync()
+        public async Task<IEnumerable<ElectionDTO>> GetAllAsync()
         {
-            // Dohvatanje modela iz repo-a
             var elections = await _unitOfWork.Elections.GetAllAsync();
+            var electionDTOs = new List<ElectionDTO>();
 
-            // Mapiranje model -> DTO (ručno, čisto)
-            return elections.Select(e => new ElectionDto
+            foreach (var e in elections)
             {
-                Id = e.Id,
-                Name = e.Name,
-                IsPublic = e.isPublic,
-                Description = e.Description,
-                ElectionType = e.ElectionType,
+                var candidates = await _unitOfWork.Candidates.GetByElectionIdAsync(e.Id);
+                electionDTOs.Add(new ElectionDTO
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    IsPublic = e.isPublic,
+                    Description = e.Description,
+                    ElectionType = e.ElectionType,
+                    Candidates = candidates.Select(c => new CandidateDTO
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        Points = c.Points
+                    }).ToList()
+                });
+            }
 
-            });
+            return electionDTOs;
         }
     }
 }

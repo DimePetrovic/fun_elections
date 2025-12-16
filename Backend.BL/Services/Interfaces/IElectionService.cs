@@ -9,6 +9,6 @@ namespace Backend.BL.Services.Interfaces
 {
     public interface IElectionService
     {
-        Task<IEnumerable<ElectionDto>> GetAllAsync();
+        Task<IEnumerable<ElectionDTO>> GetAllAsync();
     }
 }

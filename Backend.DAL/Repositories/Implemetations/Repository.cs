@@ -42,6 +42,13 @@ namespace Backend.DAL.Repositories.Implemetations
             return await _dbContext.Set<T>().AnyAsync(predicate);
         }
 
+        public async Task UpdateAsync(T entity)
+        {
+            _logger.LogDebug("Updating {EntityType} in database", typeof(T).Name);
+            _dbContext.Set<T>().Update(entity);
+            await Task.CompletedTask;
+        }
+
         public Task DeleteAsync(T entity)
         {
             _logger.LogDebug("Removing {EntityType} from database", typeof(T).Name);

@@ -8,8 +8,10 @@ public class BackendDbContext : IdentityDbContext<ApplicationUser>, IBackendDbCo
 {
     public virtual DbSet<Voter> Voters { get; set; }
     public virtual DbSet<Election> Elections { get; set; }
-
-
+    public virtual DbSet<Candidate> Candidates { get; set; }
+    public virtual DbSet<Group> Groups { get; set; }
+    public virtual DbSet<Match> Matches { get; set; }
+    
     public BackendDbContext(DbContextOptions<BackendDbContext> options) : base(options) { }
 
     // public DbSet<Product> Products { get; set; }
