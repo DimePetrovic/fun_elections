@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Backend.DAL.Models
 {
-    public class Voter : Auxiliary.IdentityDatedMode
+    public class Voter : Auxiliary.IdentityModel
     {
         public Guid ElectionId
         { get; set; }

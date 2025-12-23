@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Backend.DAL.Repositories.Implemetations
 {
-    internal class Repository<T, TContext> : IRepository<T>
+    public class Repository <T, TContext> : IRepository<T>
        where T : class
        where TContext : IDbContext
     {
@@ -40,6 +40,13 @@ namespace Backend.DAL.Repositories.Implemetations
         {
             _logger.LogDebug("Finding any {EntityType} with predicate from the database", typeof(T).Name);
             return await _dbContext.Set<T>().AnyAsync(predicate);
+        }
+
+        public async Task UpdateAsync(T entity)
+        {
+            _logger.LogDebug("Updating {EntityType} in database", typeof(T).Name);
+            _dbContext.Set<T>().Update(entity);
+            await Task.CompletedTask;
         }
 
         public Task DeleteAsync(T entity)

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Backend.DAL.Repositories.Interfaces
 {
-    public interface IVoterRepository : IRepository<Voter>
+    public interface IElectionRepository : IRepository<Election>
     {
     }
 }

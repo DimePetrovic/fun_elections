@@ -1,4 +1,5 @@
 ﻿using Backend.DAL.Contexts;
+using Backend.DAL.Repositories.Implemetations;
 using Backend.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -11,13 +12,22 @@ using System.Threading.Tasks;
 
 namespace Backend.DAL.Repositories
 {
-   internal class UnitOfWork : IUnitOfWork
+   public class UnitOfWork : IUnitOfWork
     {
 
         private readonly IBackendDbContext _dbContext;
         private IDbContextTransaction? _currentTransaction;
 
         public IApplicationUserRepository Users { get; private set; }
+
+        public IVoterRepository Voters { get; private set; }
+
+        public IElectionRepository Elections { get; private set; }
+
+        public IMatchRepository Matches { get; private set; }
+        public IGroupRepository Groups { get; private set; }
+        public ICandidateRepository Candidates { get; private set; }
+
 
         private bool _disposed;
         private readonly ILogger<UnitOfWork> _logger;
@@ -30,6 +40,8 @@ namespace Backend.DAL.Repositories
             _logger = logger;
 
             Users = userRepository;
+            Voters = new VoterRepository(backendDbContext, logger);
+            Elections = new ElectionRepository(backendDbContext, logger);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

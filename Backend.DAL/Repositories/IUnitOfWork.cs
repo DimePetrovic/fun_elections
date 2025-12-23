@@ -10,6 +10,11 @@ namespace Backend.DAL.Repositories
     public interface IUnitOfWork
     {
 
+        IVoterRepository Voters { get; }
+        IElectionRepository Elections { get; }
+        IMatchRepository Matches { get; }
+        IGroupRepository Groups { get; }
+        ICandidateRepository Candidates { get; }
         IApplicationUserRepository Users { get; }
         /// <summary>
         /// Save changes to the database

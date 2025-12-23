@@ -12,7 +12,6 @@ namespace Backend.DAL.Models.Auxiliary
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
-        public Guid Id
-        {get; set;}
+        public Guid Id {get; set;}
     }
 }
