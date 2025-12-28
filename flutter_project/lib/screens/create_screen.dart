@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/election.dart';
 
 // Create Screen - Choose election format and enter basic info
 class CreateScreen extends StatefulWidget {
@@ -9,10 +8,24 @@ class CreateScreen extends StatefulWidget {
   State<CreateScreen> createState() => _CreateScreenState();
 }
 
+enum ElectionFormatOption {
+  legacySingleVote('Legacy - Single Vote', 'Each user votes once'),
+  legacyMultipleVotes('Legacy - Multiple Votes', 'Each user can vote multiple times'),
+  legacyWeightedVotes('Legacy - Weighted Votes', 'Each user votes with weighted points'),
+  knockout('Knockout', 'Single elimination tournament'),
+  groupThenKnockout('Group → Knockout', 'Group stage followed by knockout'),
+  league('League', 'Round-robin tournament'),
+  groupThenLeague('Group → League', 'Group stage followed by league');
+
+  final String title;
+  final String description;
+  const ElectionFormatOption(this.title, this.description);
+}
+
 class _CreateScreenState extends State<CreateScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  ElectionFormat? _selectedFormat;
+  ElectionFormatOption? _selectedFormat;
   bool _isPublic = true;
 
   @override
@@ -37,21 +50,15 @@ class _CreateScreenState extends State<CreateScreen> {
       return;
     }
 
-    // Navigate to specific format screen
-    final route = switch (_selectedFormat!) {
-      ElectionFormat.knockout => '/create/knockout',
-      ElectionFormat.group => '/create/group',
-      ElectionFormat.league => '/create/league',
-      ElectionFormat.legacy => '/create/legacy',
-    };
-
+    // Navigate to settings screen based on format
     Navigator.pushNamed(
       context,
-      route,
+      '/create/settings',
       arguments: {
         'name': _nameController.text.trim(),
         'description': _descriptionController.text.trim(),
         'isPublic': _isPublic,
+        'format': _selectedFormat,
       },
     );
   }
@@ -124,10 +131,12 @@ class _CreateScreenState extends State<CreateScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    ...ElectionFormat.values.map((format) => _FormatTile(
-                          format: format,
-                          isSelected: _selectedFormat == format,
-                          onTap: () => setState(() => _selectedFormat = format),
+                    ...ElectionFormatOption.values.map((format) => RadioListTile<ElectionFormatOption>(
+                          title: Text(format.title),
+                          subtitle: Text(format.description),
+                          value: format,
+                          groupValue: _selectedFormat,
+                          onChanged: (value) => setState(() => _selectedFormat = value),
                         )),
                   ],
                 ),
@@ -143,100 +152,6 @@ class _CreateScreenState extends State<CreateScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  String _getFormatDescription(ElectionFormat format) {
-    return switch (format) {
-      ElectionFormat.knockout => 'Single elimination tournament',
-      ElectionFormat.group => 'Group stage competition',
-      ElectionFormat.league => 'Round-robin matches',
-      ElectionFormat.legacy => 'Voting-based election',
-    };
-  }
-}
-
-class _FormatTile extends StatelessWidget {
-  final ElectionFormat format;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FormatTile({
-    required this.format,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  IconData _getIcon() {
-    return switch (format) {
-      ElectionFormat.knockout => Icons.emoji_events_rounded,
-      ElectionFormat.group => Icons.groups_rounded,
-      ElectionFormat.league => Icons.sports_rounded,
-      ElectionFormat.legacy => Icons.how_to_vote_rounded,
-    };
-  }
-
-  String _getDescription() {
-    return switch (format) {
-      ElectionFormat.knockout => 'Single elimination tournament',
-      ElectionFormat.group => 'Group stage competition',
-      ElectionFormat.league => 'Round-robin matches',
-      ElectionFormat.legacy => 'Voting-based election',
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return Card(
-      elevation: isSelected ? 4 : 0,
-      color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              Icon(
-                _getIcon(),
-                size: 32,
-                color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      format.name.toUpperCase(),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? colorScheme.onPrimaryContainer : null,
-                      ),
-                    ),
-                    Text(
-                      _getDescription(),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isSelected 
-                            ? colorScheme.onPrimaryContainer 
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (isSelected)
-                Icon(
-                  Icons.check_circle_rounded,
-                  color: colorScheme.primary,
-                ),
-            ],
-          ),
         ),
       ),
     );

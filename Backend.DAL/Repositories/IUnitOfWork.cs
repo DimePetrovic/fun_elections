@@ -16,6 +16,7 @@ namespace Backend.DAL.Repositories
         IGroupRepository Groups { get; }
         ICandidateRepository Candidates { get; }
         IApplicationUserRepository Users { get; }
+        IVoteRepository Votes { get; }
         /// <summary>
         /// Save changes to the database
         /// </summary>

@@ -19,7 +19,8 @@ var key = jwtSection["Key"];
 
 // DbContext
 builder.Services.AddDbContext<BackendDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+           .ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -37,6 +38,9 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IVoterService, VoterService>();
 builder.Services.AddScoped<IElectionService, ElectionService>();
+builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<ICandidateService, CandidateService>();
 
 
 builder.Services.AddControllers();
@@ -48,12 +52,28 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevCors", policy =>
     {
-        policy.AllowAnyHeader().AllowAnyMethod()
-              .WithOrigins("http://localhost:5000", "http://localhost:3000", "http://localhost:5500", "http://localhost:4200");
+        policy.AllowAnyHeader()
+              .AllowAnyMethod()
+              .SetIsOriginAllowed(origin => 
+              {
+                  if (string.IsNullOrWhiteSpace(origin)) return false;
+                  // Allow localhost on any port
+                  if (origin.StartsWith("http://localhost:") || origin.StartsWith("http://127.0.0.1:"))
+                      return true;
+                  return false;
+              })
+              .AllowCredentials();
     });
 });
 
 var app = builder.Build();
+
+// Apply migrations automatically on startup
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<BackendDbContext>();
+    dbContext.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {

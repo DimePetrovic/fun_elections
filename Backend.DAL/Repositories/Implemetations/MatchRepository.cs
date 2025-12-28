@@ -17,10 +17,18 @@ namespace Backend.DAL.Repositories.Implemetations
         {       
         }
 
+        public override async Task<Match?> GetByIdAsync(Guid id)
+        {
+            return await _dbContext.Matches
+                .Include(m => m.Candidates)
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
         public async Task<IEnumerable<Match>> GetByElectionIdAsync(Guid electionId)
         {
             return await _dbContext.Matches
                 .Where(m => m.ElectionId == electionId)
+                .Include(m => m.Candidates)
                 .ToListAsync();
         }
     }

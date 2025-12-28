@@ -6,14 +6,19 @@ import 'screens/join_screen.dart';
 import 'screens/join_public_screen.dart';
 import 'screens/join_private_screen.dart';
 import 'screens/create_screen.dart';
-import 'screens/create_knockout_screen.dart';
-import 'screens/create_group_screen.dart';
-import 'screens/create_league_screen.dart';
-import 'screens/create_legacy_screen.dart';
-import 'screens/election_screen.dart';
+import 'screens/create_settings_screen.dart';
+import 'screens/election_screen_new.dart';
 import 'screens/my_elections_screen.dart';
+import 'screens/settings_screen.dart';
+import 'services/user_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize user on app startup
+  final userService = UserService();
+  await userService.getOrCreateUser();
+  
   runApp(const FunElectionsApp());
 }
 
@@ -98,17 +103,16 @@ class FunElectionsApp extends StatelessWidget {
           '/join/public': (context) => const JoinPublicScreen(),
           '/join/private': (context) => const JoinPrivateScreen(),
           '/create': (context) => const CreateScreen(),
-          '/create/knockout': (context) => const CreateKnockoutScreen(),
-          '/create/group': (context) => const CreateGroupScreen(),
-          '/create/league': (context) => const CreateLeagueScreen(),
-          '/create/legacy': (context) => const CreateLegacyScreen(),
+          '/create/settings': (context) => const CreateSettingsScreen(),
           '/my-elections': (context) => const MyElectionsScreen(),
+          '/settings': (context) => const SettingsScreen(),
         },
         onGenerateRoute: (settings) {
           // Handle /election/:id route
           if (settings.name?.startsWith('/election/') ?? false) {
             final id = settings.name!.substring('/election/'.length);
             return MaterialPageRoute(
+              settings: settings,
               builder: (context) => ElectionScreen(electionId: id),
             );
           }

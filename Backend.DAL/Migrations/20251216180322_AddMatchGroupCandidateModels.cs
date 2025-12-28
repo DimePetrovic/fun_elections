@@ -20,7 +20,12 @@ namespace backend.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     isPublic = table.Column<bool>(type: "bit", nullable: false),
                     ElectionType = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AdminId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    NumberOfGroups = table.Column<int>(type: "int", nullable: true),
+                    VoteCount = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -55,7 +60,10 @@ namespace backend.Migrations
                     Points = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TimeDuration = table.Column<TimeSpan>(type: "time", nullable: false),
                     IsFinished = table.Column<bool>(type: "bit", nullable: false),
-                    MatchIndex = table.Column<int>(type: "int", nullable: false)
+                    MatchIndex = table.Column<int>(type: "int", nullable: false),
+                    RoundNumber = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    WinnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -159,11 +167,52 @@ namespace backend.Migrations
                 name: "IX_Voters_UserId",
                 table: "Voters",
                 column: "UserId");
+
+            migrationBuilder.CreateTable(
+                name: "Votes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MatchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CandidateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Votes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Votes_Matches_MatchId",
+                        column: x => x.MatchId,
+                        principalTable: "Matches",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Votes_Candidates_CandidateId",
+                        column: x => x.CandidateId,
+                        principalTable: "Candidates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Votes_MatchId",
+                table: "Votes",
+                column: "MatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Votes_CandidateId",
+                table: "Votes",
+                column: "CandidateId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Votes");
+
             migrationBuilder.DropTable(
                 name: "Candidates");
 

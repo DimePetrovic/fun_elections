@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/election_store.dart';
+import '../services/api_service.dart';
 
 // Join Private Screen - Enter code to join private election
-// Hardcoded code "AAAA" for testing
 class JoinPrivateScreen extends StatefulWidget {
   const JoinPrivateScreen({super.key});
 
@@ -13,7 +11,9 @@ class JoinPrivateScreen extends StatefulWidget {
 
 class _JoinPrivateScreenState extends State<JoinPrivateScreen> {
   final _codeController = TextEditingController();
+  final _apiService = ApiService();
   String? _errorMessage;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -21,23 +21,43 @@ class _JoinPrivateScreenState extends State<JoinPrivateScreen> {
     super.dispose();
   }
 
-  void _joinWithCode() {
+  Future<void> _joinWithCode() async {
     final code = _codeController.text.trim().toUpperCase();
     if (code.isEmpty) {
       setState(() => _errorMessage = 'Please enter a code');
       return;
     }
 
-    final store = Provider.of<ElectionStore>(context, listen: false);
-    final electionId = store.joinPrivateElection(code);
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
-    if (electionId != null) {
-      Navigator.pushReplacementNamed(
-        context,
-        '/election/$electionId',
-      );
-    } else {
-      setState(() => _errorMessage = 'Invalid code. Please try again.');
+    try {
+      final election = await _apiService.getElectionByCode(code);
+      
+      // Check if election is active (status = 0)
+      if (election['status'] != 0) {
+        setState(() {
+          _errorMessage = 'This election has ended. You cannot join.';
+          _isLoading = false;
+        });
+        return;
+      }
+      
+      await _apiService.joinElection(election['id']);
+      
+      if (mounted) {
+        Navigator.pushReplacementNamed(
+          context,
+          '/election/${election['id']}',
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Invalid code. Please try again.';
+        _isLoading = false;
+      });
     }
   }
 
@@ -74,20 +94,13 @@ class _JoinPrivateScreenState extends State<JoinPrivateScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _joinWithCode,
+              onPressed: _isLoading ? null : _joinWithCode,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
-              child: const Text('Join Election'),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Tip: Try code "AAAA" for testing',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.secondary,
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.center,
+              child: _isLoading
+                ? const CircularProgressIndicator()
+                : const Text('Join Election'),
             ),
           ],
         ),

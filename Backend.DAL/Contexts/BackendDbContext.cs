@@ -11,6 +11,7 @@ public class BackendDbContext : IdentityDbContext<ApplicationUser>, IBackendDbCo
     public virtual DbSet<Candidate> Candidates { get; set; }
     public virtual DbSet<Group> Groups { get; set; }
     public virtual DbSet<Match> Matches { get; set; }
+    public virtual DbSet<Vote> Votes { get; set; }
     
     public BackendDbContext(DbContextOptions<BackendDbContext> options) : base(options) { }
 

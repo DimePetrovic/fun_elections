@@ -1,4 +1,5 @@
 using Backend.BL.DTOs;
+using Backend.DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,11 @@ namespace Backend.BL.Services.Interfaces
         Task<MatchDTO> CreateAsync(MatchDTO matchDto);
         Task<bool> UpdateAsync(Guid id, MatchDTO matchDto);
         Task<bool> DeleteAsync(Guid id);
+        Task GenerateLegacyMatchesAsync(Guid electionId, List<Candidate> candidates);
+        Task GenerateKnockoutMatchesAsync(Guid electionId, List<Candidate> candidates);
+        Task<bool> EndMatchAsync(Guid matchId, Guid winnerId);
+        Task<MatchDTO?> GetActiveMatchAsync(Guid electionId);
+        Task<bool> VoteInMatchAsync(Guid matchId, Guid candidateId, string userId);
+        Task<Vote?> GetUserVoteAsync(Guid matchId, string userId);
     }
 }

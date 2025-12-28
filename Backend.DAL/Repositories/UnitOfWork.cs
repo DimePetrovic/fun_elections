@@ -27,6 +27,7 @@ namespace Backend.DAL.Repositories
         public IMatchRepository Matches { get; private set; }
         public IGroupRepository Groups { get; private set; }
         public ICandidateRepository Candidates { get; private set; }
+        public IVoteRepository Votes { get; private set; }
 
 
         private bool _disposed;
@@ -42,6 +43,10 @@ namespace Backend.DAL.Repositories
             Users = userRepository;
             Voters = new VoterRepository(backendDbContext, logger);
             Elections = new ElectionRepository(backendDbContext, logger);
+            Matches = new MatchRepository(backendDbContext, logger);
+            Groups = new GroupRepository(backendDbContext, logger);
+            Candidates = new CandidateRepository(backendDbContext, logger);
+            Votes = new VoteRepository(backendDbContext, logger);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

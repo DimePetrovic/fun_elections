@@ -85,19 +85,14 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             
-            // Top-left: Options button
+            // Top-left: Settings button
             Positioned(
               top: 16,
               left: 16,
               child: IconButton(
                 icon: const Icon(Icons.settings_outlined, size: 28),
                 color: Colors.black,
-                onPressed: () {
-                  // TODO: Navigate to settings/options screen
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Settings coming soon')),
-                  );
-                },
+                onPressed: () => Navigator.pushNamed(context, '/settings'),
               ),
             ),
             

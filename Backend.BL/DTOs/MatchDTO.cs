@@ -15,5 +15,8 @@ namespace Backend.BL.DTOs
         public TimeSpan TimeDuration { get; set; }
         public bool IsFinished { get; set; }
         public int MatchIndex { get; set; }
+        public int RoundNumber { get; set; }
+        public bool IsActive { get; set; }
+        public Guid? WinnerId { get; set; }
     }
 }

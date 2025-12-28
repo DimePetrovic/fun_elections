@@ -11,11 +11,8 @@ class ElectionStore extends ChangeNotifier {
   final String _currentUserId = 'user123'; // Mock user ID
   final _uuid = const Uuid();
 
-  // Hardcoded private code for testing
-  static const String testPrivateCode = 'AAAA';
-
   ElectionStore() {
-    _initializeMockData();
+    // No mock data - start with empty elections list
   }
 
   List<Election> get elections => _elections;
@@ -380,46 +377,5 @@ class ElectionStore extends ChangeNotifier {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random();
     return List.generate(4, (_) => chars[random.nextInt(chars.length)]).join();
-  }
-
-  // Initialize with mock data for testing
-  void _initializeMockData() {
-    // Mock public knockout election
-    createElection(
-      name: 'Spring Championship',
-      description: 'Annual spring knockout tournament',
-      format: ElectionFormat.knockout,
-      competitorNames: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry'],
-      isPublic: true,
-    );
-
-    // Mock public league election
-    createElection(
-      name: 'Summer League',
-      description: 'Round-robin summer competition',
-      format: ElectionFormat.league,
-      competitorNames: ['Team A', 'Team B', 'Team C', 'Team D'],
-      isPublic: true,
-    );
-
-    // Mock private election with code "AAAA"
-    final privateId = _uuid.v4();
-    _elections.add(Election(
-      id: privateId,
-      name: 'Secret Tournament',
-      description: 'Private invitation-only event',
-      format: ElectionFormat.legacy,
-      code: testPrivateCode,
-      creatorId: 'otherUser',
-      isPublic: false,
-      createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      competitors: [
-        Competitor(id: _uuid.v4(), name: 'Option 1'),
-        Competitor(id: _uuid.v4(), name: 'Option 2'),
-        Competitor(id: _uuid.v4(), name: 'Option 3'),
-      ],
-      legacySubformat: LegacySubformat.voteForOne,
-      participantIds: ['otherUser'],
-    ));
   }
 }

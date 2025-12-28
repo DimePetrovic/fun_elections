@@ -87,7 +87,7 @@ namespace Backend.DAL.Repositories.Implemetations
             return await _dbContext.Set<T>().FindAsync(id);
         }
 
-        public async Task<T?> GetByIdAsync(Guid id)
+        public virtual async Task<T?> GetByIdAsync(Guid id)
         {
             _logger.LogDebug("Getting {EntityType} with ID {Id}", typeof(T).Name, id);
             return await _dbContext.Set<T>().FindAsync(id);

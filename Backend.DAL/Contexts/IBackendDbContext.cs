@@ -24,6 +24,7 @@ namespace Backend.DAL.Contexts
         DbSet<Candidate> Candidates { get; }
         DbSet<Group> Groups { get; }
         DbSet<Match> Matches { get; }
+        DbSet<Vote> Votes { get; }
 
 
     }

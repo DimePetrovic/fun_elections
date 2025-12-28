@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/election_store.dart';
+import '../services/api_service.dart';
 import '../models/election.dart';
 
 class CreateLegacyScreen extends StatefulWidget {
@@ -16,6 +15,8 @@ class _CreateLegacyScreenState extends State<CreateLegacyScreen> {
   int _voteCount = 1;
   final List<TextEditingController> _controllers = [];
   Map<String, dynamic>? _args;
+  final _apiService = ApiService();
+  bool _isLoading = false;
 
   @override
   void didChangeDependencies() {
@@ -41,19 +42,54 @@ class _CreateLegacyScreenState extends State<CreateLegacyScreen> {
     super.dispose();
   }
 
-  void _create() {
-    final names = _controllers.map((c) => c.text.trim()).where((n) => n.isNotEmpty).toList();
-    final store = Provider.of<ElectionStore>(context, listen: false);
-    final id = store.createElection(
-      name: _args!['name'],
-      description: _args!['description'],
-      format: ElectionFormat.legacy,
-      competitorNames: names,
-      isPublic: _args!['isPublic'],
-      legacySubformat: _subformat,
-      legacyVoteCount: _subformat == LegacySubformat.voteForOne ? null : _voteCount,
-    );
-    Navigator.pushReplacementNamed(context, '/election/$id');
+  Future<void> _create() async {
+    setState(() => _isLoading = true);
+    
+    try {
+      final names = _controllers.map((c) => c.text.trim()).where((n) => n.isNotEmpty).toList();
+      
+      // Map LegacySubformat to backend ElectionType enum
+      String electionType;
+      switch (_subformat) {
+        case LegacySubformat.voteForOne:
+          electionType = 'LegacySingleVote';
+          break;
+        case LegacySubformat.voteForMultiple:
+          electionType = 'LegacyMultipleVotes';
+          break;
+        case LegacySubformat.voteForMultipleWeighted:
+          electionType = 'LegacyWeightedVotes';
+          break;
+      }
+      
+      final electionData = {
+        'name': _args!['name'],
+        'description': _args!['description'],
+        'isPublic': _args!['isPublic'],
+        'electionType': electionType,
+        'voteCount': _subformat == LegacySubformat.voteForOne ? null : _voteCount,
+        'candidates': names.map((name) => {
+          'name': name,
+          'points': 0,
+        }).toList(),
+      };
+      
+      final result = await _apiService.createElection(electionData);
+      
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/election/${result['id']}');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error creating election: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -128,9 +164,11 @@ class _CreateLegacyScreenState extends State<CreateLegacyScreen> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: _create,
+              onPressed: _isLoading ? null : _create,
               style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16), minimumSize: const Size.fromHeight(50)),
-              child: const Text('CREATE ELECTION'),
+              child: _isLoading 
+                ? const CircularProgressIndicator()
+                : const Text('CREATE ELECTION'),
             ),
           ),
         ],
