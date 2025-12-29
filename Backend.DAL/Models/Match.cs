@@ -17,7 +17,6 @@ namespace Backend.DAL.Models
         public TimeSpan TimeDuration { get; set; }
         public bool IsFinished { get; set; } = false;
         public int MatchIndex { get; set; } // Sequential match number
-        public int RoundNumber { get; set; } // For knockout: 1=first round, 2=quarterfinals, etc.
         public bool IsActive { get; set; } = false; // Only one match can be active at a time
         public Guid? WinnerId { get; set; } // Candidate who won this match
         public Candidate? Winner { get; set; }

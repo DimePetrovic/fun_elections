@@ -15,14 +15,12 @@ namespace Backend.BL.Services.Implemetations
     public class ElectionService : IElectionService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMatchService _matchService;
         private readonly ILogger<ElectionService> _logger;
         private static readonly Random _random = new Random();
 
-        public ElectionService(IUnitOfWork unitOfWork, IMatchService matchService, ILogger<ElectionService> logger)
+        public ElectionService(IUnitOfWork unitOfWork, ILogger<ElectionService> logger)
         {
             _unitOfWork = unitOfWork;
-            _matchService = matchService;
             _logger = logger;
         }
 
@@ -120,11 +118,15 @@ namespace Backend.BL.Services.Implemetations
                     electionDTO.ElectionType == EElectionType.LegacyMultipleVotes ||
                     electionDTO.ElectionType == EElectionType.LegacyWeightedVotes)
                 {
-                    await _matchService.GenerateLegacyMatchesAsync(election.Id, candidates);
+                    await GenerateLegacyMatchesAsync(election.Id, candidates);
                 }
                 else if (electionDTO.ElectionType == EElectionType.Knockout)
                 {
-                    await _matchService.GenerateKnockoutMatchesAsync(election.Id, candidates);
+                    await GenerateKnockoutMatchesAsync(election.Id, candidates);
+                }
+                else if (electionDTO.ElectionType == EElectionType.League)
+                {
+                    await GenerateLeagueMatchesAsync(election.Id, candidates);
                 }
             }
             else
@@ -223,9 +225,144 @@ namespace Backend.BL.Services.Implemetations
             return true;
         }
 
+        // Generate matches for Legacy format (single match with all candidates)
+        private async Task GenerateLegacyMatchesAsync(Guid electionId, List<Candidate> candidates)
+        {
+            var match = new Match
+            {
+                Id = Guid.NewGuid(),
+                ElectionId = electionId,
+                MatchIndex = 1,
+                IsActive = true,
+                IsFinished = false,
+                Candidates = candidates,
+                Points = new List<int>(new int[candidates.Count])
+            };
+
+            await _unitOfWork.Matches.AddAsync(match);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        // Generate knockout bracket matches
+        private async Task GenerateKnockoutMatchesAsync(Guid electionId, List<Candidate> candidates)
+        {
+            if (!IsPowerOfTwo(candidates.Count))
+                throw new ArgumentException("Number of candidates must be a power of 2 for knockout");
+
+            int n = candidates.Count;
+            int totalMatches = n - 1; // Za n kandidata, n-1 meceva
+            
+            // Kreiraj SVE prazne mečeve (n-1)
+            for (int matchIndex = 1; matchIndex <= totalMatches; matchIndex++)
+            {
+                var match = new Match
+                {
+                    Id = Guid.NewGuid(),
+                    ElectionId = electionId,
+                    MatchIndex = matchIndex,
+                    IsActive = true,
+                    IsFinished = false,
+                    Candidates = new List<Candidate>(),
+                    Points = new List<int>()
+                };
+                await _unitOfWork.Matches.AddAsync(match);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            _logger.LogInformation("Created {Count} empty matches", totalMatches);
+
+            // Popuni prvih n/2 mečeva sa kandidatima
+            await FillInitialKnockoutMatchesWithCandidatesAsync(electionId, candidates);
+        }
+
+        // Generate league matches (round-robin: svako sa svakim)
+        private async Task GenerateLeagueMatchesAsync(Guid electionId, List<Candidate> candidates)
+        {
+            int n = candidates.Count;
+            int totalMatches = (n * (n - 1)) / 2; // Kombinacije: C(n,2)
+            
+            int matchIndex = 1;
+            
+            // Generiši sve parove kandidata
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = i + 1; j < n; j++)
+                {
+                    var match = new Match
+                    {
+                        Id = Guid.NewGuid(),
+                        ElectionId = electionId,
+                        MatchIndex = matchIndex,
+                        IsActive = true,
+                        IsFinished = false,
+                        Candidates = new List<Candidate> 
+                        { 
+                            candidates[i], 
+                            candidates[j] 
+                        },
+                        Points = new List<int> { 0, 0 }
+                    };
+                    
+                    await _unitOfWork.Matches.AddAsync(match);
+                    _logger.LogInformation("Created league match {Index}: {C1} vs {C2}", 
+                        matchIndex, candidates[i].Name, candidates[j].Name);
+                    
+                    matchIndex++;
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            _logger.LogInformation("Created {Count} league matches for {N} candidates", 
+                totalMatches, n);
+        }
+
+        private async Task FillInitialKnockoutMatchesWithCandidatesAsync(Guid electionId, List<Candidate> candidates)
+        {
+            int n = candidates.Count;
+            int initialMatchesNumber = n / 2; // Prvih n/2 meceva imaju kandidate
+
+            // Dohvati sve mečeve za ovu election iz baze
+            var allMatches = (await _unitOfWork.Matches.GetByElectionIdAsync(electionId))
+                .OrderBy(m => m.MatchIndex)
+                .ToList();
+
+            // Popuni prvih n/2 mečeva sa kandidatima
+            for (int matchIndex = 1; matchIndex <= initialMatchesNumber; matchIndex++)
+            {
+                var match = allMatches.FirstOrDefault(m => m.MatchIndex == matchIndex);
+                if (match == null)
+                {
+                    _logger.LogError("Match with index {Index} not found!", matchIndex);
+                    continue;
+                }
+
+                int candidateIndex = (matchIndex - 1) * 2;
+                
+                if (match.Candidates == null)
+                    match.Candidates = new List<Candidate>();
+                
+                match.Candidates.Add(candidates[candidateIndex]);
+                match.Candidates.Add(candidates[candidateIndex + 1]);
+                match.Points = new List<int> { 0, 0 };
+
+                await _unitOfWork.Matches.UpdateAsync(match);
+                _logger.LogInformation("Filled match {Index} with candidates: {C1} vs {C2}", 
+                    matchIndex, candidates[candidateIndex].Name, candidates[candidateIndex + 1].Name);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            
+            _logger.LogInformation("Filled {Count} initial matches with candidates", initialMatchesNumber);
+        }
+
+        private bool IsPowerOfTwo(int n)
+        {
+            return n > 0 && (n & (n - 1)) == 0;
+        }
+
         private string GenerateUniqueCode()
         {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             return new string(Enumerable.Repeat(chars, 6)
                 .Select(s => s[_random.Next(s.Length)]).ToArray());
         }

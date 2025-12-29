@@ -56,7 +56,6 @@ namespace Backend.BL.Services.Implemetations
                 TimeDuration = match.TimeDuration,
                 IsFinished = match.IsFinished,
                 MatchIndex = match.MatchIndex,
-                RoundNumber = match.RoundNumber,
                 IsActive = match.IsActive,
                 WinnerId = match.WinnerId
             };
@@ -79,7 +78,6 @@ namespace Backend.BL.Services.Implemetations
                 TimeDuration = m.TimeDuration,
                 IsFinished = m.IsFinished,
                 MatchIndex = m.MatchIndex,
-                RoundNumber = m.RoundNumber,
                 IsActive = m.IsActive,
                 WinnerId = m.WinnerId
             });
@@ -128,97 +126,6 @@ namespace Backend.BL.Services.Implemetations
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
-
-        // Generate matches for Legacy format (single match with all candidates)
-        public async Task GenerateLegacyMatchesAsync(Guid electionId, List<Candidate> candidates)
-        {
-            var match = new Match
-            {
-                Id = Guid.NewGuid(),
-                ElectionId = electionId,
-                MatchIndex = 1,
-                RoundNumber = 1,
-                IsActive = true,
-                IsFinished = false,
-                Candidates = candidates,
-                Points = new List<int>(new int[candidates.Count])
-            };
-
-            await _unitOfWork.Matches.AddAsync(match);
-            await _unitOfWork.SaveChangesAsync();
-        }
-
-        // Generate knockout bracket matches
-        public async Task GenerateKnockoutMatchesAsync(Guid electionId, List<Candidate> candidates)
-        {
-            if (!IsPowerOfTwo(candidates.Count))
-                throw new ArgumentException("Number of candidates must be a power of 2 for knockout");
-
-            int n = candidates.Count;
-            int totalMatches = n - 1; // Za n kandidata, n-1 meceva
-            
-            // Kreiraj SVE prazne mečeve (n-1)
-            for (int matchIndex = 1; matchIndex <= totalMatches; matchIndex++)
-            {
-                var match = new Match
-                {
-                    Id = Guid.NewGuid(),
-                    ElectionId = electionId,
-                    MatchIndex = matchIndex,
-                    IsActive = true,
-                    IsFinished = false,
-                    Candidates = new List<Candidate>(),
-                    Points = new List<int>()
-                };
-                await _unitOfWork.Matches.AddAsync(match);
-            }
-
-            await _unitOfWork.SaveChangesAsync();
-            _logger.LogInformation("Created {Count} empty matches", totalMatches);
-
-            // Popuni prvih n/2 mečeva sa kandidatima
-            await FillInitialMatchesWithCandidatesAsync(electionId, candidates);
-        }
-
-        public async Task FillInitialMatchesWithCandidatesAsync(Guid electionId, List<Candidate> candidates)
-        {
-            int n = candidates.Count;
-            int initialMatchesNumber = n / 2; // Prvih n/2 meceva imaju kandidate
-
-            // Dohvati sve mečeve za ovu election iz baze
-            var allMatches = (await _unitOfWork.Matches.GetByElectionIdAsync(electionId))
-                .OrderBy(m => m.MatchIndex)
-                .ToList();
-
-            // Popuni prvih n/2 mečeva sa kandidatima
-            for (int matchIndex = 1; matchIndex <= initialMatchesNumber; matchIndex++)
-            {
-                var match = allMatches.FirstOrDefault(m => m.MatchIndex == matchIndex);
-                if (match == null)
-                {
-                    _logger.LogError("Match with index {Index} not found!", matchIndex);
-                    continue;
-                }
-
-                int candidateIndex = (matchIndex - 1) * 2;
-                
-                if (match.Candidates == null)
-                    match.Candidates = new List<Candidate>();
-                
-                match.Candidates.Add(candidates[candidateIndex]);
-                match.Candidates.Add(candidates[candidateIndex + 1]);
-                match.Points = new List<int> { 0, 0 };
-
-                await _unitOfWork.Matches.UpdateAsync(match);
-                _logger.LogInformation("Filled match {Index} with candidates: {C1} vs {C2}", 
-                    matchIndex, candidates[candidateIndex].Name, candidates[candidateIndex + 1].Name);
-            }
-
-            await _unitOfWork.SaveChangesAsync();
-            
-            _logger.LogInformation("Filled {Count} initial matches with candidates", initialMatchesNumber);
-        }
-
 
         // End match and advance winner (winner determined by vote count)
         public async Task<bool> EndMatchAsync(Guid matchId, Guid winnerId)
@@ -456,7 +363,6 @@ namespace Backend.BL.Services.Implemetations
                 TimeDuration = activeMatch.TimeDuration,
                 IsFinished = activeMatch.IsFinished,
                 MatchIndex = activeMatch.MatchIndex,
-                RoundNumber = activeMatch.RoundNumber,
                 IsActive = activeMatch.IsActive,
                 WinnerId = activeMatch.WinnerId
             };
@@ -524,11 +430,6 @@ namespace Backend.BL.Services.Implemetations
         public async Task<Vote?> GetUserVoteAsync(Guid matchId, string userId)
         {
             return await _unitOfWork.Votes.GetUserVoteAsync(matchId, userId);
-        }
-
-        private bool IsPowerOfTwo(int n)
-        {
-            return n > 0 && (n & (n - 1)) == 0;
         }
     }
 }
