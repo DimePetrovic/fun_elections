@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/api_service.dart';
 import '../services/user_service.dart';
+import '../services/signalr_service.dart';
 
 // Election Screen - View and interact with an election
 // Admin: Can vote, finish match, and delete election
@@ -18,6 +19,7 @@ class ElectionScreen extends StatefulWidget {
 class _ElectionScreenState extends State<ElectionScreen> {
   final _apiService = ApiService();
   final _userService = UserService();
+  final _signalRService = SignalRService();
   Map<String, dynamic>? _election;
   List<dynamic>? _matches;
   Map<String, dynamic>? _activeMatch;
@@ -32,9 +34,21 @@ class _ElectionScreenState extends State<ElectionScreen> {
     _initializeUser();
   }
 
+  @override
+  void dispose() {
+    _signalRService.disconnect();
+    super.dispose();
+  }
+
   Future<void> _initializeUser() async {
     _currentUserId = await _userService.getCurrentUserId();
     await _loadElection();
+    
+    // Connect to SignalR for real-time updates
+    await _signalRService.connect(widget.electionId, () {
+      print('SignalR: Match ended notification - refreshing election');
+      _loadElection();
+    });
   }
 
   Future<void> _loadElection() async {

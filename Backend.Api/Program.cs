@@ -10,6 +10,7 @@ using Backend.DAL.Repositories.Interfaces;
 using Backend.DAL.Repositories.Implemetations;
 using Backend.BL.Services.Interfaces;
 using Backend.BL.Services.Implemetations;
+using Backend.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +47,9 @@ builder.Services.AddScoped<ICandidateService, CandidateService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// SignalR for real-time updates
+builder.Services.AddSignalR();
 
 // CORS: dozvoli Flutter web + android emulator (localhost)
 builder.Services.AddCors(options =>
@@ -89,5 +93,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ElectionHub>("/electionHub");
 
 app.Run();

@@ -181,6 +181,9 @@ namespace backend.Migrations
                     b.Property<Guid>("ElectionId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsFinished")
                         .HasColumnType("bit");
 
@@ -191,8 +194,14 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RoundNumber")
+                        .HasColumnType("int");
+
                     b.Property<TimeSpan>("TimeDuration")
                         .HasColumnType("time");
+
+                    b.Property<Guid?>("WinnerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

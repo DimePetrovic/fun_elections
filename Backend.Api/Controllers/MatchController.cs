@@ -2,6 +2,8 @@ using Backend.BL.DTOs;
 using Backend.BL.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Backend.Api.Hubs;
 using System.Security.Claims;
 
 namespace Backend.Api.Controllers
@@ -14,12 +16,18 @@ namespace Backend.Api.Controllers
         private readonly ILogger<MatchController> _logger;
         private readonly IMatchService _matchService;
         private readonly IElectionService _electionService;
+        private readonly IHubContext<ElectionHub> _hubContext;
 
-        public MatchController(ILogger<MatchController> logger, IMatchService matchService, IElectionService electionService)
+        public MatchController(
+            ILogger<MatchController> logger, 
+            IMatchService matchService, 
+            IElectionService electionService,
+            IHubContext<ElectionHub> hubContext)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _matchService = matchService ?? throw new ArgumentNullException(nameof(matchService));
             _electionService = electionService ?? throw new ArgumentNullException(nameof(electionService));
+            _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
         }
 
         [HttpGet]
@@ -198,10 +206,23 @@ namespace Backend.Api.Controllers
         {
             try
             {
+                // Get match to find election ID before ending it
+                var match = await _matchService.GetByIdAsync(id);
+                if (match == null)
+                    return NotFound("Match not found");
+
+                var electionId = match.ElectionId;
+
                 // Winner will be determined by vote count in service layer
                 var result = await _matchService.EndMatchAsync(id, Guid.Empty);
                 if (!result)
                     return BadRequest("Failed to end match");
+
+                // Send SignalR notification to all users in this election
+                await _hubContext.Clients.Group($"election_{electionId}")
+                    .SendAsync("MatchEnded", new { matchId = id, electionId = electionId });
+
+                _logger.LogInformation("Match {MatchId} ended. SignalR notification sent to election_{ElectionId}", id, electionId);
 
                 return Ok(new { message = "Match ended successfully" });
             }
