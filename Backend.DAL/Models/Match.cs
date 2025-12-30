@@ -20,5 +20,8 @@ namespace Backend.DAL.Models
         public bool IsActive { get; set; } = false; // Only one match can be active at a time
         public Guid? WinnerId { get; set; } // Candidate who won this match
         public Candidate? Winner { get; set; }
+        
+        // Temporary: Keep for database compatibility until migration is applied
+        public int RoundNumber { get; set; } = 1;
     }
 }

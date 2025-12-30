@@ -297,7 +297,7 @@ class ElectionStore extends ChangeNotifier {
 
       rounds.add(Round(
         id: _uuid.v4(),
-        roundNumber: roundNum,
+        // roundNumber removed
         matches: matches,
       ));
 
@@ -350,7 +350,7 @@ class ElectionStore extends ChangeNotifier {
     if (matches.isNotEmpty) {
       rounds.add(Round(
         id: _uuid.v4(),
-        roundNumber: 1,
+        // roundNumber removed
         matches: matches,
       ));
     }

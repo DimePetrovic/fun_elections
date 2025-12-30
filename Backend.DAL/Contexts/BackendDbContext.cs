@@ -13,7 +13,14 @@ public class BackendDbContext : IdentityDbContext<ApplicationUser>, IBackendDbCo
     public virtual DbSet<Match> Matches { get; set; }
     public virtual DbSet<Vote> Votes { get; set; }
     
+
     public BackendDbContext(DbContextOptions<BackendDbContext> options) : base(options) { }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        ModelBuilderExtensions.ConfigureVotesCascade(modelBuilder);
+    }
 
     // public DbSet<Product> Products { get; set; }
 

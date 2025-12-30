@@ -89,23 +89,23 @@ class Match {
 
 class Round {
   final String id;
-  final int roundNumber;
+  // roundNumber removed
   final List<Match> matches;
 
   Round({
     required this.id,
-    required this.roundNumber,
+    // roundNumber removed
     required this.matches,
   });
 
   Round copyWith({
     String? id,
-    int? roundNumber,
+    // roundNumber removed
     List<Match>? matches,
   }) {
     return Round(
       id: id ?? this.id,
-      roundNumber: roundNumber ?? this.roundNumber,
+      // roundNumber removed
       matches: matches ?? this.matches,
     );
   }

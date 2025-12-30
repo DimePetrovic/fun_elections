@@ -335,7 +335,7 @@ class _ElectionScreenState extends State<ElectionScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Match ${_activeMatch!['matchIndex']} - Round ${_activeMatch!['roundNumber']}',
+              'Match ${_activeMatch!['matchIndex']}',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -540,9 +540,8 @@ class _ElectionScreenState extends State<ElectionScreen> {
     candidates.sort((a, b) => (b['points'] as int).compareTo(a['points'] as int));
     
     // Find the final match (highest round number)
-    final maxRound = finishedMatches.isEmpty ? 0 : 
-        finishedMatches.map((m) => m['roundNumber'] as int).reduce((a, b) => a > b ? a : b);
-    final finalMatch = finishedMatches.where((m) => m['roundNumber'] == maxRound).firstOrNull;
+    // roundNumber removed
+    final finalMatch = finishedMatches.firstOrNull;
     
     final winnerId = finalMatch?['winnerId'];
     
