@@ -16,6 +16,7 @@ class _CreateSettingsScreenState extends State<CreateSettingsScreen> {
   // Common fields
   final List<TextEditingController> _candidateControllers = [];
   int _numberOfCandidates = 4;
+  final TextEditingController _numberOfCandidatesController = TextEditingController(text: '4');
   
   // Legacy specific
   int _voteCount = 3;
@@ -87,6 +88,7 @@ class _CreateSettingsScreenState extends State<CreateSettingsScreen> {
     for (var controller in _candidateControllers) {
       controller.dispose();
     }
+    _numberOfCandidatesController.dispose();
     super.dispose();
   }
 
@@ -361,6 +363,32 @@ class _CreateSettingsScreenState extends State<CreateSettingsScreen> {
                                       });
                                     }
                                   },
+                                )
+                              else if (format == ElectionFormatOption.league)
+                                SizedBox(
+                                  width: 150,
+                                  child: TextField(
+                                    controller: _numberOfCandidatesController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Number of Teams',
+                                      border: OutlineInputBorder(),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    ),
+                                    onSubmitted: (value) {
+                                      final n = int.tryParse(value);
+                                      if (n != null && n >= 2 && n <= 20) {
+                                        setState(() {
+                                          _numberOfCandidates = n;
+                                          _numberOfCandidatesController.text = '$n';
+                                          _initializeCandidates();
+                                        });
+                                      } else {
+                                        // Revert to previous valid value
+                                        _numberOfCandidatesController.text = '$_numberOfCandidates';
+                                      }
+                                    },
+                                  ),
                                 ),
                             ],
                           ),

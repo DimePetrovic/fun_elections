@@ -20,6 +20,20 @@ public class BackendDbContext : IdentityDbContext<ApplicationUser>, IBackendDbCo
     {
         base.OnModelCreating(modelBuilder);
         ModelBuilderExtensions.ConfigureVotesCascade(modelBuilder);
+        
+        // Configure Match.Candidates relationship explicitly to prevent WinnerId1 shadow property
+        modelBuilder.Entity<Candidate>()
+            .HasOne<Match>()
+            .WithMany(m => m.Candidates)
+            .HasForeignKey(c => c.MatchId)
+            .OnDelete(DeleteBehavior.NoAction);
+        
+        // Configure Match.Winner relationship
+        modelBuilder.Entity<Match>()
+            .HasOne(m => m.Winner)
+            .WithMany()
+            .HasForeignKey(m => m.WinnerId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 
     // public DbSet<Product> Products { get; set; }

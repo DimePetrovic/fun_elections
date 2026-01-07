@@ -263,7 +263,8 @@ namespace Backend.BL.Services.Implemetations
                     IsActive = true,
                     IsFinished = false,
                     Candidates = new List<Candidate>(),
-                    Points = new List<int>()
+                    Points = new List<int>(),
+                    RoundNumber = 0
                 };
                 await _unitOfWork.Matches.AddAsync(match);
             }
@@ -281,38 +282,67 @@ namespace Backend.BL.Services.Implemetations
             int n = candidates.Count;
             int totalMatches = (n * (n - 1)) / 2; // Kombinacije: C(n,2)
             
-            int matchIndex = 1;
-            
             // Generiši sve parove kandidata
+            var matchPairs = new List<(Candidate, Candidate)>();
             for (int i = 0; i < n; i++)
             {
                 for (int j = i + 1; j < n; j++)
                 {
-                    var match = new Match
-                    {
-                        Id = Guid.NewGuid(),
-                        ElectionId = electionId,
-                        MatchIndex = matchIndex,
-                        IsActive = true,
-                        IsFinished = false,
-                        Candidates = new List<Candidate> 
-                        { 
-                            candidates[i], 
-                            candidates[j] 
-                        },
-                        Points = new List<int> { 0, 0 }
-                    };
-                    
-                    await _unitOfWork.Matches.AddAsync(match);
-                    _logger.LogInformation("Created league match {Index}: {C1} vs {C2}", 
-                        matchIndex, candidates[i].Name, candidates[j].Name);
-                    
-                    matchIndex++;
+                    matchPairs.Add((candidates[i], candidates[j]));
                 }
             }
 
+            // NASUMIČNO premeštaj parove
+            var random = new Random();
+            matchPairs = matchPairs.OrderBy(x => random.Next()).ToList();
+            
+            // 1. Kreiraj PRAZNE mečeve (kao u Knockout formatu)
+            for (int matchIndex = 1; matchIndex <= totalMatches; matchIndex++)
+            {
+                var match = new Match
+                {
+                    Id = Guid.NewGuid(),
+                    ElectionId = electionId,
+                    MatchIndex = matchIndex,
+                    IsActive = (matchIndex == 1), // Samo prvi meč je aktivan
+                    IsFinished = false,
+                    RoundNumber = 0
+                };
+                
+                await _unitOfWork.Matches.AddAsync(match);
+            }
+
             await _unitOfWork.SaveChangesAsync();
-            _logger.LogInformation("Created {Count} league matches for {N} candidates", 
+            _logger.LogInformation("Created {Count} empty league matches", totalMatches);
+
+            // 2. Dohvati sve mečeve iz baze (IDENTIČNO kao u Knockout formatu)
+            var allMatches = (await _unitOfWork.Matches.GetByElectionIdAsync(electionId))
+                .OrderBy(m => m.MatchIndex)
+                .ToList();
+
+            // 3. Popuni mečeve sa CandidateIds (za League format - IZBEGNI MatchId FK problem)
+            for (int matchIndex = 1; matchIndex <= totalMatches; matchIndex++)
+            {
+                var match = allMatches.FirstOrDefault(m => m.MatchIndex == matchIndex);
+                if (match == null)
+                {
+                    _logger.LogError("Match with index {Index} not found!", matchIndex);
+                    continue;
+                }
+
+                var (candidate1, candidate2) = matchPairs[matchIndex - 1];
+                
+                // Za League format: čuvaj samo ID-jeve, NE postavljaj Candidate.MatchId
+                match.CandidateIds = new List<Guid> { candidate1.Id, candidate2.Id };
+                match.Points = new List<int> { 0, 0 };
+
+                await _unitOfWork.Matches.UpdateAsync(match);
+                _logger.LogInformation("Filled league match {Index} with candidate IDs: {C1} vs {C2}", 
+                    matchIndex, candidate1.Name, candidate2.Name);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            _logger.LogInformation("Filled {Count} league matches for {N} candidates in RANDOM order. First match is active.", 
                 totalMatches, n);
         }
 

@@ -12,6 +12,7 @@ namespace Backend.DAL.Models
         public int Points { get; set; } = 0;
 
         public Guid ElectionId { get; set; }
+        public Guid? MatchId { get; set; } // Nullable jer kandidat može da ne bude dodeljen meču
         
     }
 }

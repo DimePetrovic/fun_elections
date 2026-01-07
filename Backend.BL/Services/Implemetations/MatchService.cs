@@ -210,6 +210,9 @@ namespace Backend.BL.Services.Implemetations
                 _logger.LogInformation("After AdvanceWinner for match {MatchId}, changes saved", match.Id);
             }
 
+            // Activate next match (for both knockout and league)
+            await ActivateNextMatchByIndexAsync(match.ElectionId, match.MatchIndex);
+
             // IMPORTANT: Re-fetch matches from database after potential new match creation
             // Check if all matches are finished - if so, mark election as Ended
             var allMatches = await _unitOfWork.Matches.GetByElectionIdAsync(match.ElectionId);
@@ -341,13 +344,25 @@ namespace Backend.BL.Services.Implemetations
         {
             var matches = await _unitOfWork.Matches.GetByElectionIdAsync(electionId);
             
+            _logger.LogInformation("🔍 GetActiveMatch: Found {Count} total matches", matches.Count());
+            
+            foreach (var m in matches.OrderBy(x => x.MatchIndex))
+            {
+                _logger.LogInformation("  Match {Index}: IsActive={Active}, IsFinished={Finished}, Candidates.Count={CandidateCount}",
+                    m.MatchIndex, m.IsActive, m.IsFinished, m.Candidates?.Count ?? 0);
+            }
+            
             // Vrati prvi aktivan meč koji IMA 2 kandidata (spreman je za igranje)
             var activeMatch = matches
                 .Where(m => m.IsActive && !m.IsFinished && m.Candidates.Count == 2)
                 .OrderBy(m => m.MatchIndex)
                 .FirstOrDefault();
             
-            if (activeMatch == null) return null;
+            if (activeMatch == null)
+            {
+                _logger.LogWarning("❌ No active match found with 2 candidates!");
+                return null;
+            }
 
             return new MatchDTO
             {
@@ -430,6 +445,44 @@ namespace Backend.BL.Services.Implemetations
         public async Task<Vote?> GetUserVoteAsync(Guid matchId, string userId)
         {
             return await _unitOfWork.Votes.GetUserVoteAsync(matchId, userId);
+        }
+
+        // Activate next match by index (works for both knockout and league)
+        private async Task ActivateNextMatchByIndexAsync(Guid electionId, int currentMatchIndex)
+        {
+            var allMatches = (await _unitOfWork.Matches.GetByElectionIdAsync(electionId))
+                .OrderBy(m => m.MatchIndex)
+                .ToList();
+
+            // Find next match (by MatchIndex) that is not finished and has 2 candidates
+            var nextMatch = allMatches
+                .FirstOrDefault(m => m.MatchIndex == currentMatchIndex + 1 && 
+                                    !m.IsFinished && 
+                                    m.Candidates.Count == 2);
+
+            if (nextMatch != null)
+            {
+                nextMatch.IsActive = true;
+                await _unitOfWork.Matches.UpdateAsync(nextMatch);
+                await _unitOfWork.SaveChangesAsync();
+                
+                // Log with safe candidate name access
+                if (nextMatch.Candidates != null && nextMatch.Candidates.Count >= 2)
+                {
+                    _logger.LogInformation("Activated next match: Index {Index} ({C1} vs {C2})",
+                        nextMatch.MatchIndex,
+                        nextMatch.Candidates[0].Name,
+                        nextMatch.Candidates[1].Name);
+                }
+                else
+                {
+                    _logger.LogInformation("Activated next match: Index {Index}", nextMatch.MatchIndex);
+                }
+            }
+            else
+            {
+                _logger.LogInformation("No more matches to activate (current index: {Index})", currentMatchIndex);
+            }
         }
     }
 }

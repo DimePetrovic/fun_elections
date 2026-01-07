@@ -19,17 +19,45 @@ namespace Backend.DAL.Repositories.Implemetations
 
         public override async Task<Match?> GetByIdAsync(Guid id)
         {
-            return await _dbContext.Matches
+            var match = await _dbContext.Matches
                 .Include(m => m.Candidates)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (match != null && match.CandidateIds != null && match.CandidateIds.Any())
+            {
+                // For League matches: populate Candidates from CandidateIds
+                var candidates = await _dbContext.Candidates
+                    .Where(c => match.CandidateIds.Contains(c.Id))
+                    .ToListAsync();
+                
+                match.Candidates = candidates;
+            }
+
+            return match;
         }
 
         public async Task<IEnumerable<Match>> GetByElectionIdAsync(Guid electionId)
         {
-            return await _dbContext.Matches
+            var matches = await _dbContext.Matches
                 .Where(m => m.ElectionId == electionId)
                 .Include(m => m.Candidates)
                 .ToListAsync();
+
+            // For League matches: populate Candidates from CandidateIds
+            foreach (var match in matches)
+            {
+                if (match.CandidateIds != null && match.CandidateIds.Any())
+                {
+                    // Load candidates by IDs
+                    var candidates = await _dbContext.Candidates
+                        .Where(c => match.CandidateIds.Contains(c.Id))
+                        .ToListAsync();
+                    
+                    match.Candidates = candidates;
+                }
+            }
+
+            return matches;
         }
     }
 }
